@@ -58,7 +58,17 @@ class DiarizationEngine:
         )
         if self.enable_speaker:
             kwargs["spk_model"] = SPK_MODEL
-        self._model = AutoModel(**kwargs)
+        try:
+            self._model = AutoModel(**kwargs)
+        except RuntimeError as exc:
+            # FunASR 在模型下載失敗時會拋出令人困惑的 "not registered" 錯誤
+            if "is not registered" in str(exc):
+                raise RuntimeError(
+                    "模型載入失敗:通常是首次下載模型時無法連上 ModelScope。"
+                    "請確認網路連線(需可存取 modelscope.cn),或設定 proxy 後重試。"
+                    f"\n原始錯誤:{exc}"
+                ) from exc
+            raise
         logger.info("模型載入完成")
 
     def transcribe(self, wav_path: str, hotword: str = "") -> list[dict]:

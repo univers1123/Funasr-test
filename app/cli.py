@@ -7,6 +7,7 @@ import logging
 import sys
 
 from .engine import DiarizationEngine
+from .media import MediaError
 from .pipeline import process_file
 from .subtitle import SubtitleOptions
 
@@ -40,17 +41,26 @@ def main(argv: list[str] | None = None) -> int:
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
+    try:
+        speaker_names = parse_speaker_names(args.speaker_names)
+    except argparse.ArgumentTypeError as exc:
+        parser.error(str(exc))
+
     options = SubtitleOptions(
         merge_gap_ms=args.merge_gap_ms,
         max_chars=args.max_chars,
-        speaker_names=parse_speaker_names(args.speaker_names),
+        speaker_names=speaker_names,
         show_speaker=not args.no_speaker,
     )
     engine = DiarizationEngine(device=args.device, enable_speaker=not args.no_speaker)
 
-    result = process_file(
-        args.input, args.output_dir, engine=engine, options=options, hotword=args.hotword
-    )
+    try:
+        result = process_file(
+            args.input, args.output_dir, engine=engine, options=options, hotword=args.hotword
+        )
+    except MediaError as exc:
+        print(f"錯誤:{exc}", file=sys.stderr)
+        return 1
     print(f"SRT: {result.srt_path}")
     print(f"VTT: {result.vtt_path}")
     print(f"TXT: {result.txt_path}")
