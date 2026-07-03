@@ -1,0 +1,24 @@
+services:
+  subtitle:
+    build: .
+    image: funasr-subtitle:0.1
+    ports:
+      - "7860:7860"
+    volumes:
+      # 模型快取(首次啟動下載約 1-2GB,之後重用)
+      - modelscope-cache:/root/.cache/modelscope
+      # 輸出字幕檔
+      - ./output:/data/output
+    environment:
+      - DEVICE=cuda:0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  modelscope-cache:

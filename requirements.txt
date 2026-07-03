@@ -1,0 +1,14 @@
+# 核心推論
+funasr>=1.1.4
+modelscope>=1.15.0
+# torch / torchaudio 由 Docker base image 提供 CUDA 版;
+# 本地開發請依 https://pytorch.org 安裝對應版本
+torch>=2.1.0
+torchaudio>=2.1.0
+
+# Web 介面
+gradio>=4.36.0
+
+# 工具
+soundfile
+numpy
