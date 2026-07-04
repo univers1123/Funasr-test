@@ -3,7 +3,7 @@
 services:
   subtitle:
     build: .
-    image: funasr-subtitle:0.1
+    image: funasr-subtitle:1.0
     ports:
       - "7860:7860"
     volumes:
