@@ -1,6 +1,7 @@
 # 語者分離字幕生成系統 — GPU 推論 image
 # base image 已含 PyTorch + CUDA runtime,免去使用者處理 CUDA 依賴
-FROM pytorch/pytorch:2.3.1-cuda12.1-cudnn8-runtime
+# 注意:RTX 50 系列(Blackwell, sm_120)需要 CUDA 12.8 以上,勿降版
+FROM pytorch/pytorch:2.7.1-cuda12.8-cudnn9-runtime
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \

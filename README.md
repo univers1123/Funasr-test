@@ -99,9 +99,29 @@ scripts/        # 環境檢查腳本
 
 ## 常見問題
 
+**Q: 容器一直重啟 / 啟動就崩潰?**
+先看崩潰原因:`docker compose logs --tail=50 subtitle`。
+再用 CPU 模式排查是否為 GPU 掛載問題:
+`docker compose -f docker-compose.cpu.yml up --build`
+(能啟動就代表程式正常,問題出在 GPU passthrough 或驅動。)
+
+**Q: RTX 50 系列(5060 Ti / 5070…)跑不起來?**
+Blackwell 架構需要 CUDA 12.8 以上。本專案 base image 已用
+`pytorch 2.7.1 + cu128`;若你改過 Dockerfile,請勿降到 cu121 以下,
+並把 NVIDIA 驅動更新到 570 以上。
+
 **Q: 容器啟動失敗,顯示 GPU 相關錯誤?**
 先跑 `bash scripts/check_env.sh`。常見原因:Docker Desktop 未啟用 WSL2 整合、
-NVIDIA 驅動太舊(需支援 CUDA 12.1)。
+NVIDIA 驅動太舊(需支援 CUDA 12.8)。
+
+**Q: WSL2 / Docker Desktop 整個掛掉重啟?**
+可能是記憶體不足(模型載入需 4GB 以上)。在 Windows 使用者目錄建立
+`.wslconfig` 提高上限後執行 `wsl --shutdown` 再重開 Docker Desktop:
+```ini
+[wsl2]
+memory=12GB
+swap=8GB
+```
 
 **Q: 首次處理很久沒反應?**
 第一次執行會從 ModelScope 下載約 1-2GB 模型,請看容器 log(`docker compose logs -f`)。

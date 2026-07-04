@@ -18,7 +18,9 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
-    restart: unless-stopped
+    # 測試階段不自動重啟:容器若崩潰會停下,才看得到錯誤
+    # (docker compose logs subtitle 查原因);穩定後可改回 unless-stopped
+    restart: "no"
 
 volumes:
   modelscope-cache:

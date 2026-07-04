@@ -1,0 +1,17 @@
+# CPU 備援模式:GPU 掛載出問題時用來排查(推論很慢,僅供測試)
+# 使用:docker compose -f docker-compose.cpu.yml up --build
+services:
+  subtitle:
+    build: .
+    image: funasr-subtitle:0.1
+    ports:
+      - "7860:7860"
+    volumes:
+      - modelscope-cache:/root/.cache/modelscope
+      - ./output:/data/output
+    environment:
+      - DEVICE=cpu
+    # 不自動重啟,才看得到崩潰原因;log 用 docker compose logs 查看
+
+volumes:
+  modelscope-cache:
