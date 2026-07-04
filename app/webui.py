@@ -74,8 +74,13 @@ def run(
         f"耗時 {result.elapsed_sec:.1f} 秒"
     )
     files = [str(result.srt_path), str(result.vtt_path), str(result.txt_path)]
-    # 輸入是影片時,提供「影片 + 字幕」預覽播放
-    player = (file_path, str(result.vtt_path)) if is_video(file_path) else None
+    # 輸入是影片時,提供「影片 + 字幕」預覽播放。
+    # 注意:Gradio 6 的 Video.postprocess 不接受 (video, subtitle) tuple
+    # (文件寫可以但實作是壞的),必須用元件更新的方式帶 subtitles
+    if is_video(file_path):
+        player = gr.Video(value=file_path, subtitles=str(result.vtt_path))
+    else:
+        player = gr.Video(value=None)
     return summary, preview, files, player
 
 
