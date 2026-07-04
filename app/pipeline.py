@@ -34,6 +34,7 @@ def process_file(
     engine: DiarizationEngine | None = None,
     options: SubtitleOptions | None = None,
     hotword: str = "",
+    num_speakers: int | None = None,
     progress: ProgressCallback | None = None,
 ) -> PipelineResult:
     """處理單一檔案,輸出 SRT / VTT / TXT 到 output_dir。"""
@@ -57,7 +58,9 @@ def process_file(
         engine.load()
 
         report(0.30, "語音辨識 + 語者分離中…")
-        sentence_info = engine.transcribe(str(wav_path), hotword=hotword)
+        sentence_info = engine.transcribe(
+            str(wav_path), hotword=hotword, num_speakers=num_speakers
+        )
 
     report(0.85, "產生字幕檔…")
     segments = build_subtitles(sentence_info, options)

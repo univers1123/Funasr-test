@@ -35,6 +35,7 @@ def run(
     hotword: str,
     show_speaker: bool,
     traditional: bool,
+    num_speakers: float | None,
     progress: gr.Progress = gr.Progress(),
 ):
     if not file_path:
@@ -58,6 +59,7 @@ def run(
             engine=get_engine(),
             options=options,
             hotword=hotword or "",
+            num_speakers=int(num_speakers) if num_speakers else None,
             progress=on_progress,
         )
     except Exception as exc:  # noqa: BLE001
@@ -93,6 +95,13 @@ def build_app() -> gr.Blocks:
                 )
                 show_speaker = gr.Checkbox(value=True, label="字幕加上語者標籤")
                 traditional = gr.Checkbox(value=True, label="轉為繁體中文(台灣用語)")
+                num_speakers = gr.Number(
+                    label="語者人數(選填)",
+                    value=None,
+                    precision=0,
+                    minimum=0,
+                    info="已知影片中有幾個人說話時填入,可提升分離準度;留空為自動偵測",
+                )
                 speaker_names = gr.Textbox(
                     label="語者名稱(選填)",
                     placeholder="例:1=主持人,2=來賓",
@@ -110,7 +119,7 @@ def build_app() -> gr.Blocks:
 
         submit.click(
             run,
-            inputs=[file_input, speaker_names, hotword, show_speaker, traditional],
+            inputs=[file_input, speaker_names, hotword, show_speaker, traditional, num_speakers],
             outputs=[summary, preview, downloads, player],
         )
     return demo

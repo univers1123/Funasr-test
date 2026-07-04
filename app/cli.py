@@ -38,6 +38,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--merge-gap-ms", type=int, default=800, help="同語者合併間隔上限(毫秒)")
     parser.add_argument("--max-chars", type=int, default=42, help="單條字幕最大字元數")
     parser.add_argument("--simplified", action="store_true", help="保留簡體輸出(預設轉繁體)")
+    parser.add_argument(
+        "--num-speakers", type=int, default=None,
+        help="實際語者人數(已知時指定可提升分離準度,預設自動偵測)",
+    )
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -58,7 +62,12 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         result = process_file(
-            args.input, args.output_dir, engine=engine, options=options, hotword=args.hotword
+            args.input,
+            args.output_dir,
+            engine=engine,
+            options=options,
+            hotword=args.hotword,
+            num_speakers=args.num_speakers,
         )
     except MediaError as exc:
         print(f"錯誤:{exc}", file=sys.stderr)

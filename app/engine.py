@@ -71,16 +71,23 @@ class DiarizationEngine:
             raise
         logger.info("模型載入完成")
 
-    def transcribe(self, wav_path: str, hotword: str = "") -> list[dict]:
+    def transcribe(
+        self, wav_path: str, hotword: str = "", num_speakers: int | None = None
+    ) -> list[dict]:
         """辨識 16kHz mono WAV,回傳 sentence_info 列表。
 
         每個元素:{"text": str, "start": ms, "end": ms, "spk": int}
+        num_speakers 指定實際語者人數(已知時可明顯提升分離準度),None 為自動偵測。
         """
         self.load()
+        extra: dict[str, Any] = {}
+        if num_speakers and num_speakers > 0:
+            extra["preset_spk_num"] = int(num_speakers)
         results = self._model.generate(
             input=wav_path,
             batch_size_s=300,
             hotword=hotword,
+            **extra,
         )
         if not results:
             return []
