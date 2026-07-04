@@ -12,3 +12,6 @@ gradio>=4.36.0
 # 工具
 soundfile
 numpy
+# 簡體 → 繁體(台灣用語)轉換
+opencc-python-reimplemented
+

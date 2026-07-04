@@ -136,3 +136,33 @@ class TestCliHelpers:
 
         with pytest.raises(argparse.ArgumentTypeError):
             parse_speaker_names("主持人")
+
+
+class TestSpeakerRenumber:
+    def test_renumber_by_first_appearance(self):
+        # 聚類標籤順序刻意打亂:3 先出現、接著 0、再 3、再 1
+        info = [
+            {"text": "甲說話", "start": 0, "end": 1000, "spk": 3},
+            {"text": "乙說話", "start": 2000, "end": 3000, "spk": 0},
+            {"text": "甲又說", "start": 4000, "end": 5000, "spk": 3},
+            {"text": "丙說話", "start": 6000, "end": 7000, "spk": 1},
+        ]
+        segments = build_subtitles(info, SubtitleOptions(traditional=False))
+        assert [seg.speaker for seg in segments] == [0, 1, 0, 2]
+
+    def test_srt_first_speaker_is_speaker_1(self):
+        info = [{"text": "先說話的人", "start": 0, "end": 1000, "spk": 7}]
+        srt = to_srt(build_subtitles(info, SubtitleOptions(traditional=False)))
+        assert "[Speaker 1]" in srt
+
+
+class TestTraditionalConversion:
+    def test_converts_to_taiwan_traditional(self):
+        info = [{"text": "这个软件的信息", "start": 0, "end": 1000, "spk": 0}]
+        segments = build_subtitles(info, SubtitleOptions(traditional=True))
+        assert segments[0].text == "這個軟體的資訊"
+
+    def test_simplified_preserved_when_disabled(self):
+        info = [{"text": "这个软件", "start": 0, "end": 1000, "spk": 0}]
+        segments = build_subtitles(info, SubtitleOptions(traditional=False))
+        assert segments[0].text == "这个软件"

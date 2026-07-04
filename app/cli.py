@@ -37,6 +37,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--speaker-names", default=None, help='語者名稱,如 "1=主持人,2=來賓"')
     parser.add_argument("--merge-gap-ms", type=int, default=800, help="同語者合併間隔上限(毫秒)")
     parser.add_argument("--max-chars", type=int, default=42, help="單條字幕最大字元數")
+    parser.add_argument("--simplified", action="store_true", help="保留簡體輸出(預設轉繁體)")
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -51,6 +52,7 @@ def main(argv: list[str] | None = None) -> int:
         max_chars=args.max_chars,
         speaker_names=speaker_names,
         show_speaker=not args.no_speaker,
+        traditional=not args.simplified,
     )
     engine = DiarizationEngine(device=args.device, enable_speaker=not args.no_speaker)
 

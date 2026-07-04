@@ -21,8 +21,12 @@
 | 語音活動偵測 | `fsmn-vad`(長音檔自動分段,避免顯存不足) |
 | 語者分離 | `cam++`(campplus,與 ASR 同源整合) |
 | 音軌抽取 | ffmpeg(16kHz mono WAV) |
-| Web 介面 | Gradio(上傳 → 進度 → 下載) |
+| 繁體轉換 | OpenCC `s2twp`(簡體 → 台灣正體 + 台灣用語,預設開啟) |
+| Web 介面 | Gradio(上傳 → 進度 → 字幕預覽播放 → 下載) |
 | 部署 | Docker Compose + NVIDIA GPU |
+
+**語者編號規則:** `Speaker 1` 一定是影片中最先開口的人,依出現順序遞增
+(cam++ 的原始聚類標籤與順序無關,已做重新編號後處理)。
 
 ## 快速開始(Docker,建議)
 
@@ -72,6 +76,14 @@ python -m app.webui   # http://localhost:7860
 | `--speaker-names` | 語者顯示名稱,如 `"1=主持人,2=來賓"` |
 | `--merge-gap-ms` | 同語者相鄰句合併間隔上限(預設 800ms) |
 | `--max-chars` | 單條字幕最大字元數(預設 42) |
+| `--simplified` | 保留簡體輸出(預設轉繁體台灣用語) |
+
+## 播放字幕
+
+- **Web 介面內直接看**:輸入是影片時,處理完成後右側會出現帶字幕的預覽播放器
+- **影片播放器**:把下載的 `.srt` 改成與影片同名放同一資料夾
+  (如 `訪談.mp4` + `訪談.srt`),VLC / PotPlayer / MPC-HC 會自動載入
+- **YouTube / 剪輯軟體**:上傳 `.srt`(YouTube 字幕後台)或 `.vtt`(網頁播放器)皆可
 
 ## 執行測試
 

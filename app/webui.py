@@ -10,6 +10,7 @@ import gradio as gr
 
 from .cli import parse_speaker_names
 from .engine import DiarizationEngine
+from .media import is_video
 from .pipeline import process_file
 from .subtitle import SubtitleOptions
 
@@ -33,6 +34,7 @@ def run(
     speaker_names_raw: str,
     hotword: str,
     show_speaker: bool,
+    traditional: bool,
     progress: gr.Progress = gr.Progress(),
 ):
     if not file_path:
@@ -42,7 +44,9 @@ def run(
     except Exception as exc:  # noqa: BLE001
         raise gr.Error(f"語者名稱格式錯誤:{exc}") from exc
 
-    options = SubtitleOptions(speaker_names=speaker_names, show_speaker=show_speaker)
+    options = SubtitleOptions(
+        speaker_names=speaker_names, show_speaker=show_speaker, traditional=traditional
+    )
 
     def on_progress(pct: float, msg: str) -> None:
         progress(pct, desc=msg)
@@ -68,7 +72,9 @@ def run(
         f"耗時 {result.elapsed_sec:.1f} 秒"
     )
     files = [str(result.srt_path), str(result.vtt_path), str(result.txt_path)]
-    return summary, preview, files
+    # 輸入是影片時,提供「影片 + 字幕」預覽播放
+    player = (file_path, str(result.vtt_path)) if is_video(file_path) else None
+    return summary, preview, files, player
 
 
 def build_app() -> gr.Blocks:
@@ -86,6 +92,7 @@ def build_app() -> gr.Blocks:
                     type="filepath",
                 )
                 show_speaker = gr.Checkbox(value=True, label="字幕加上語者標籤")
+                traditional = gr.Checkbox(value=True, label="轉為繁體中文(台灣用語)")
                 speaker_names = gr.Textbox(
                     label="語者名稱(選填)",
                     placeholder="例:1=主持人,2=來賓",
@@ -97,13 +104,14 @@ def build_app() -> gr.Blocks:
                 submit = gr.Button("開始處理", variant="primary")
             with gr.Column():
                 summary = gr.Textbox(label="結果摘要", interactive=False)
-                preview = gr.Textbox(label="SRT 預覽", lines=18, interactive=False)
+                player = gr.Video(label="字幕預覽播放(影片輸入時)", interactive=False)
+                preview = gr.Textbox(label="SRT 預覽", lines=12, interactive=False)
                 downloads = gr.File(label="下載字幕檔", file_count="multiple")
 
         submit.click(
             run,
-            inputs=[file_input, speaker_names, hotword, show_speaker],
-            outputs=[summary, preview, downloads],
+            inputs=[file_input, speaker_names, hotword, show_speaker, traditional],
+            outputs=[summary, preview, downloads, player],
         )
     return demo
 

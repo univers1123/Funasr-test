@@ -6,10 +6,13 @@ import shutil
 import subprocess
 from pathlib import Path
 
-SUPPORTED_EXTENSIONS = {
-    ".mp4", ".mkv", ".mov", ".avi", ".webm", ".flv", ".ts",
-    ".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".opus", ".wma",
-}
+VIDEO_EXTENSIONS = {".mp4", ".mkv", ".mov", ".avi", ".webm", ".flv", ".ts"}
+AUDIO_EXTENSIONS = {".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".opus", ".wma"}
+SUPPORTED_EXTENSIONS = VIDEO_EXTENSIONS | AUDIO_EXTENSIONS
+
+
+def is_video(path: str | Path) -> bool:
+    return Path(path).suffix.lower() in VIDEO_EXTENSIONS
 
 
 class MediaError(RuntimeError):
