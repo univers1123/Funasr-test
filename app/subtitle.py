@@ -135,29 +135,15 @@ def to_txt(segments: list[Segment], options: SubtitleOptions | None = None) -> s
     return "\n".join(lines) + ("\n" if lines else "")
 
 
-def renumber_speakers(segments: list[Segment]) -> list[Segment]:
-    """把語者編號改為「按出現順序」:最先說話的是 0(顯示為 Speaker 1)。
-
-    cam++ 的原始編號是聚類標籤,與說話順序無關,重新編號後
-    「Speaker 1」一定是影片中第一位開口的人。
-    """
-    mapping: dict[int, int] = {}
-    for seg in segments:
-        if seg.speaker is not None and seg.speaker not in mapping:
-            mapping[seg.speaker] = len(mapping)
-    for seg in segments:
-        if seg.speaker is not None:
-            seg.speaker = mapping[seg.speaker]
-    return segments
-
-
 def build_subtitles(
     sentence_info: list[dict], options: SubtitleOptions | None = None
 ) -> list[Segment]:
-    """從 FunASR sentence_info 產生合併後的字幕片段(單一入口)。"""
+    """從 FunASR sentence_info 產生合併後的字幕片段(單一入口)。
+
+    語者編號沿用 cam++ 的原始聚類標籤(顯示時 +1,即 spk 0 → Speaker 1)。
+    """
     options = options or SubtitleOptions()
     segments = sentence_info_to_segments(sentence_info)
-    segments = renumber_speakers(segments)
     if options.traditional:
         from .convert import to_traditional
 
