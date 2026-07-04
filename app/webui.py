@@ -110,9 +110,12 @@ def build_app() -> gr.Blocks:
 
 def main() -> None:
     demo = build_app()
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     demo.queue(max_size=8).launch(
         server_name=os.environ.get("GRADIO_SERVER_NAME", "0.0.0.0"),
         server_port=int(os.environ.get("GRADIO_SERVER_PORT", "7860")),
+        # 字幕檔寫在 OUTPUT_DIR,必須加入允許清單 Gradio 才肯提供下載
+        allowed_paths=[str(OUTPUT_DIR.resolve())],
     )
 
 
